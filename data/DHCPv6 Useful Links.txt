@@ -1,0 +1,5 @@
+DHCPv6 Links
+
+http://en.wikiversity.org/wiki/Wireshark/DHCPv6
+
+http://serverfault.com/questions/538859/understanding-dhcpv6-stateful-solicit-message
