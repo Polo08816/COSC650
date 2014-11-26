@@ -1,6 +1,3 @@
-/**
- * 
- */
 package client;
 
 import java.io.BufferedReader;
@@ -9,34 +6,16 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
 
-import launcher.*;
 
-/**
- * @author 
- *
- */
-
-/**
- * @author J14688
- *
- */
-/**
- * @author J14688
- *
- */
 public class Client {
 	
-	//contains list of websites - can this just be a List?
 	private ArrayList<URL> listOfWebsites;
-	
-	
+		
 	/**
 	 * Constructor for Client.
 	 */
-	public Client(){
+	public Client(){	
 		
-		//initializes list to null
-		listOfWebsites = new ArrayList();
 		
 	}	
 	
@@ -49,7 +28,14 @@ public class Client {
 	 */
 	public void readListWebsites(){
 		
-		//read from command line
+		/*
+		 * Initializes ArrayList<URL> here instead of constructor.
+		 * Originally, this was in the constructor.
+		 * 
+		 * TODO - determine if we are going to run only one instance of
+		 * Client for both URLs and file handling with the Server class.
+		 */
+		listOfWebsites = new ArrayList<URL>();
 		
 		System.out.println("\nEnter a list of websites:\n");
 		
@@ -58,23 +44,67 @@ public class Client {
 	    String enterWebsites = null;
 	 
 	    try {
+	    	
 	    	while ((enterWebsites = br2.readLine()) != null){
 	    		
-	    		//delim by \n aka [enter] and end by '.'
+
+	    		/*
+	    		 * The user input of a list of URLs where each individual URL will be delimited by \n.  
+	    		 * The implementation of this should be handle directly by .readlLine().
+	    		 * 
+	    		 * Therefore, we only need to account for the "." which indicates that the user
+	    		 * has completed entering a list of URLs.
+	    		 * 
+	    		 * There is a special case where the user may have already completed entering the
+	    		 * list of URLs but forgot to put "." at the end of the last entry.  In which case
+	    		 * the last line of entry may just be a string with just ".".  We will account for
+	    		 * this case by checking if it startsWith and endsWith ".".
+	    		 * 
+	    		 * Sequences of condition checks:
+	    		 * 1.  	Check if starts with "."
+	    		 * 		*End of List determined
+	    		 * 2.  	Check if starts with "http" (
+	    		 * 
+	    		 */
+	    		
+	    		
+	    		if (enterWebsites.startsWith(".")){
+    				
+    				//Test case: where input is just "."
+    				//System.out.println("\nonly .\n");
+	    			break;
+    				
+    			}
+	    		
+	    		/*
+    			 * The URL constructor requires that the URL be created with a protocol.  In our
+    			 * case this is the "http://".  The assignment requires that the user only enter
+    			 * the URL without the protocol.
+    			 * 
+    			 * I included logic to account for the way the user is expected to input the
+    			 * "partial" URLs from the command line.
+    			 */
+	    		
+	    		if (enterWebsites.startsWith("http")){
+    				//do nothing
+    			} else {
+    				enterWebsites = "http://" + enterWebsites;
+    			}
 	    			    		
 	    		if (enterWebsites.endsWith(".")){
+	    			
 	    			enterWebsites = enterWebsites.substring(0, enterWebsites.length() -1);
-	    			System.out.println(" *** End of List ***\n");
-	    			break; //does it break out of the while loop?
+	    			listOfWebsites.add(new URL(enterWebsites));
+	    			
+	    			System.out.println("\n *** End of List ***\n");
+	    			break;
 	    		} else {
-	    			if (enterWebsites.startsWith("http")){
-	    				listOfWebsites.add(new URL(enterWebsites));
-	    			} else {
-	    				enterWebsites = "http://" + enterWebsites;
-	    				listOfWebsites.add(new URL(enterWebsites));
-	    			}
+	    			
+	    			listOfWebsites.add(new URL(enterWebsites));
+
 	    		}
 	    		
+	    		//resets the String to empty string
 	    		enterWebsites = "";
 	    	}
 	    	
@@ -101,21 +131,33 @@ public class Client {
 	
 	
 	/**
-	 * A function that primarily serves as a debugging utility to iterate through an ArrayList of websites.
+	 * A function that primarily serves as a debugging utility to iterate through an ArrayList of URLs.
+	 * 
+	 * @return Returns -1 if size of ArrayList<URL> listOfWebsites is 0.
+	 * @return Returns 1 if size of ArrayList<URL> listOfWebsites greater than 0.
 	 */
-	public void debugIterateListWebsites(){
+	public int debugIterateListWebsites(){
 		
 		if (listOfWebsites == null || listOfWebsites.size() == 0){
 			System.out.println("\nArrayList of websites has not been initialized or populated");
-			return;
+			return -1;
+			
+		}
+				
+		List<URL> x = listOfWebsites;
+		for (URL y : x){
+			System.out.println("toExternalForm(): " + y.toExternalForm());
+			System.out.println("toString(): " + y.toString());
+			try {
+				System.out.println("toURI(): " + y.toURI() +"\n");
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 		
-		Iterator<URL> x = listOfWebsites.iterator();
-		
-		while (x.hasNext()){
-			System.out.println(x.toString());
-		}
+		return 1;
 		
 	}
 	
