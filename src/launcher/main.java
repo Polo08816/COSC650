@@ -43,8 +43,13 @@ public class main {
 	    	
 	    	case "1": //Client - List of Websites
 	    		
+	    		
+	    		
 	    		Client listOfWebsites = new Client();
 	    		
+	    		//reads a list of websites from command line
+	    		listOfWebsites.readListWebsites();
+	    		//listOfWebsites.debugIterateListWebsites();
 	    	
 	    		break;
 	    		
@@ -87,6 +92,7 @@ public class main {
 //            System.out.println(inputLine);
 //        in.close();
 
+	    return;
 	}
 
 }
