@@ -49,7 +49,7 @@ public class main {
 	    		
 	    		//reads a list of websites from command line
 	    		listOfWebsites.readListWebsites();
-	    		listOfWebsites.debugIterateListWebsites();
+	    		//listOfWebsites.debugIterateListWebsites();
 	    	
 	    		break;
 	    		

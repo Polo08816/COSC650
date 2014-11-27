@@ -41,6 +41,7 @@ public class ClientURLThread extends Thread{
 			in = new BufferedReader(
 			new InputStreamReader(link.openStream()));
 			
+			System.out.println("\nSTART: "+ link.toExternalForm() + "\n");
 			while ((inputLine = in.readLine()) != null)
 				System.out.println(inputLine);
 			in.close();
@@ -48,6 +49,8 @@ public class ClientURLThread extends Thread{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		System.out.println("\nEND: "+ link.toExternalForm() + "\n");
 		
 		
 	}

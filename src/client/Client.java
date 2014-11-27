@@ -124,6 +124,8 @@ public class Client {
 	    
 	    listOfWebsites.trimToSize();
 	    
+	    iterateListWebsites();
+	    
 	    return;	    
 		
 	}
@@ -160,17 +162,24 @@ public class Client {
 		
 	}
 	
-	public void iterateListWebsites(){
+	public int iterateListWebsites(){
 		
-		//iterates through ArrayList
-			//spawns thread to do HTTP GET for each website
-				//is the threading part going to be its own seaparate class? - https://docs.oracle.com/javase/tutorial/networking/sockets/examples/KKMultiServerThread.java
+		if (listOfWebsites == null || listOfWebsites.size() == 0){
+			System.out.println("\nArrayList of websites has not been initialized or populated");
+			return -1;
+			
+		}
+				
+		List<URL> x = listOfWebsites;
+		for (URL y : x){
+			
+			System.out.println("toExternalForm(): " + y.toExternalForm() + "\n");
+			new ClientURLThread(y).start();
+			
+		}
 		
+		return 1;
 		
-		/*
-		 * 
-		 * 
-		 */
 	}
 	
 	
