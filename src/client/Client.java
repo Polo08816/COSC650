@@ -1,6 +1,7 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
@@ -10,6 +11,9 @@ import java.util.*;
 public class Client {
 	
 	private ArrayList<URL> listOfWebsites;
+	
+	//relative path for output file of HTML since HTML has trouble fitting into the console window
+	public static final String webhtmlOutput = "output/websitehtml.txt";
 		
 	/**
 	 * Constructor for Client.
@@ -36,6 +40,17 @@ public class Client {
 		 * Client for both URLs and file handling with the Server class.
 		 */
 		listOfWebsites = new ArrayList<URL>();
+		
+		File webTxt = new File(webhtmlOutput);
+		try {
+			webTxt.createNewFile();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("\nCould not create new file.\n");
+			e1.printStackTrace();
+		}
+		
+		System.out.println("Path of output file: " + webTxt.getAbsolutePath() + "\n");
 		
 		System.out.println("\nEnter a list of websites:\n");
 		
