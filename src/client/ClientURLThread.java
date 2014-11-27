@@ -19,7 +19,7 @@ public class ClientURLThread extends Thread{
 	}
 	
 
-	public void run(){
+	public synchronized void run(){
 		
 		try {
 
