@@ -66,32 +66,6 @@ public class main {
 	    }
 	    
 	    
-	    
-//		//TODO will move this to Client
-//		URL oracle = null;
-//		
-//		try {
-//		    oracle = new URL("http://oracle.com/");
-//		    URLConnection myURLConnection = oracle.openConnection();
-//		    myURLConnection.connect();
-//		} 
-//		catch (MalformedURLException e) { 
-//		    // new URL() failed
-//		    // ...
-//		} 
-//		catch (IOException e) {   
-//		    // openConnection() failed
-//		    // ...
-//		}
-//		
-//        BufferedReader in = new BufferedReader(
-//        new InputStreamReader(oracle.openStream()));
-//
-//        String inputLine;
-//        while ((inputLine = in.readLine()) != null)
-//            System.out.println(inputLine);
-//        in.close();
-
 	    return;
 	}
 
