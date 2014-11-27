@@ -85,14 +85,13 @@ public class Client {
     			 * "partial" URLs from the command line.
     			 */
 	    		
-	    		if (enterWebsites.startsWith("http")){
-    				//do nothing
-    			} else {
+	    		if (enterWebsites.startsWith("http") == false){
     				enterWebsites = "http://" + enterWebsites;
     			}
 	    			    		
 	    		if (enterWebsites.endsWith(".")){
 	    			
+	    			//removes the period at the end of the string
 	    			enterWebsites = enterWebsites.substring(0, enterWebsites.length() -1);
 	    			listOfWebsites.add(new URL(enterWebsites));
 	    			
