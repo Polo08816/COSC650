@@ -2,13 +2,14 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import java.nio.channels.*;
 import java.util.*;
 
 
 public class Client {
 	
 	private ArrayList<URL> listOfWebsites;
-	private Thread currentThread;
+	//private Thread currentThread;
 	
 	//relative path for output file of HTML since HTML has trouble fitting into the console window
 	public static final String webhtmlOutput = "output/websitehtml.txt";
@@ -181,6 +182,12 @@ public class Client {
 		
 	}
 	
+	/**
+	 * Iterates through an ArrayList and spawns a new thread for each URL.
+	 * 
+	 * @return Returns -1 if size of ArrayList<URL> listOfWebsites is 0.
+	 * @return Returns 1 if size of ArrayList<URL> listOfWebsites greater than 0.
+	 */
 	public int iterateListWebsites(){
 		
 		
@@ -203,9 +210,9 @@ public class Client {
 			e1.printStackTrace();
 		}
 		
-		FileWriter fileWriter = null;
+		FileChannel fileChannel = null;
 		try {
-			fileWriter = new FileWriter(webhtmlOutput);
+			fileChannel = new FileOutputStream(webTxt,true).getChannel();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -220,12 +227,10 @@ public class Client {
 			System.out.println("toExternalForm(): " + y.toExternalForm() + "\n");
 			
 			//TODO need to lock this statement
-			new ClientURLThread(y, fileWriter).start();
+			new ClientURLThread(y, fileChannel).start();
 			
 
-		}
-		
-		
+		}		
 		
 		return 1;
 		

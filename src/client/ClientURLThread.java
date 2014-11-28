@@ -2,21 +2,23 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
 
 public class ClientURLThread extends Thread{
 	
 	private URL link = null;
-	private FileWriter fileWriter= null;
+	private FileChannel fileChannel = null;
 	
 	/**
 	 * This is the constructor for this class that supports multithreaded HTML retrieval from a URL.
 	 * 
 	 * @param urlFromClient
 	 */
-	public ClientURLThread(URL urlFromClient, FileWriter fw){
+	public ClientURLThread(URL urlFromClient, FileChannel fc){
 		super("ClientURLThread");
 		this.link = urlFromClient;
-		this.fileWriter = fw;
+		this.fileChannel = fc;
 		
 	}
 	
@@ -43,19 +45,29 @@ public class ClientURLThread extends Thread{
 			
 			in = new BufferedReader(new InputStreamReader(link.openStream()));
 			
-			System.out.println("\nSTART: "+ link.toExternalForm() + "\n");
-			fileWriter.write("\nSTART: "+ link.toExternalForm() + "\n");
+			FileLock fileLock = fileChannel.lock();
+			if(fileLock != null)
+			{
+				String outString = "\nSTART: "+ link.toExternalForm() + "\n";
+				ByteBuffer byteBuffer = ByteBuffer.wrap(outString.getBytes());
+				System.out.println(outString);
+				fileChannel.write(byteBuffer);
 			
-			while ((inputLine = in.readLine()) != null){
+				while ((inputLine = in.readLine()) != null){
 				
-				System.out.println(inputLine);
-				fileWriter.write("\n" + inputLine + "\n");
+					System.out.println(inputLine);
+					outString = "\n" + inputLine + "\n";
+					byteBuffer = ByteBuffer.wrap(outString.getBytes());
+					fileChannel.write(byteBuffer);
 				
-			}	
+				}	
 			
-			System.out.println("\nEND: "+ link.toExternalForm() + "\n");
-			fileWriter.write("\\nEND: "+ link.toExternalForm() + "\n");
-			
+				outString = "\nEND: "+ link.toExternalForm() + "\n";
+				System.out.println(outString);
+				byteBuffer = ByteBuffer.wrap(outString.getBytes());
+				fileChannel.write(byteBuffer);
+			}			
+			fileLock.release();
 			in.close();
 			
 		} catch (IOException e) {
