@@ -1,9 +1,6 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.util.*;
 
@@ -41,17 +38,6 @@ public class Client {
 		 */
 		listOfWebsites = new ArrayList<URL>();
 		
-		File webTxt = new File(webhtmlOutput);
-		try {
-			webTxt.createNewFile();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			System.out.println("\nCould not create new file.\n");
-			e1.printStackTrace();
-		}
-		
-		System.out.println("Path of output file: " + webTxt.getAbsolutePath() + "\n");
-		
 		System.out.println("\nEnter a list of websites:\n");
 		
 		BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in));
@@ -86,7 +72,7 @@ public class Client {
 	    		if (enterWebsites.startsWith(".")){
     				
     				//Test case: where input is just "."
-    				//System.out.println("\nonly .\n");
+    				//System.out.println("\nOnly .\n");
 	    			break;
     				
     			}
@@ -179,19 +165,47 @@ public class Client {
 	
 	public int iterateListWebsites(){
 		
+		
 		if (listOfWebsites == null || listOfWebsites.size() == 0){
 			System.out.println("\nArrayList of websites has not been initialized or populated");
 			return -1;
 			
 		}
+		
+		/*
+		 * Write output of HTP GET request to file.
+		 */
+		File webTxt = new File(webhtmlOutput);
+		
+		try {
+			webTxt.createNewFile();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("\nCould not create new file.\n");
+			e1.printStackTrace();
+		}
+		
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter(webhtmlOutput);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("Path of output file: " + webTxt.getAbsolutePath() + "\n");
 				
 		List<URL> x = listOfWebsites;
 		for (URL y : x){
 			
 			System.out.println("toExternalForm(): " + y.toExternalForm() + "\n");
-			new ClientURLThread(y).start();
+			
+			//TO-DO need to lock this statement
+			new ClientURLThread(y, fileWriter).start();
 			
 		}
+		
+		
 		
 		return 1;
 		
