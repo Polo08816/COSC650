@@ -35,24 +35,29 @@ public class ClientURLThread extends Thread{
 	    // openConnection() failed
 	    // ...
 		}
-	
-
 		
 		BufferedReader in;
 		String inputLine;
 		
 		try {
+			
 			in = new BufferedReader(new InputStreamReader(link.openStream()));
 			
 			System.out.println("\nSTART: "+ link.toExternalForm() + "\n");
 			fileWriter.write("\nSTART: "+ link.toExternalForm() + "\n");
+			
 			while ((inputLine = in.readLine()) != null){
+				
 				System.out.println(inputLine);
 				fileWriter.write("\n" + inputLine + "\n");
+				
 			}	
+			
 			System.out.println("\nEND: "+ link.toExternalForm() + "\n");
 			fileWriter.write("\\nEND: "+ link.toExternalForm() + "\n");
+			
 			in.close();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

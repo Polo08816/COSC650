@@ -8,6 +8,7 @@ import java.util.*;
 public class Client {
 	
 	private ArrayList<URL> listOfWebsites;
+	private Thread currentThread;
 	
 	//relative path for output file of HTML since HTML has trouble fitting into the console window
 	public static final String webhtmlOutput = "output/websitehtml.txt";
@@ -125,6 +126,8 @@ public class Client {
 	    
 	    listOfWebsites.trimToSize();
 	    
+	    removeDuplicateURLs();
+	    
 	    iterateListWebsites();
 	    
 	    return;	    
@@ -163,6 +166,21 @@ public class Client {
 		
 	}
 	
+	/**
+	 * Eliminates duplicate URLs if provided by user.
+	 * 
+	 * Creates a HashSet and adds all elements of the listOfWebsites ArrayList to
+	 * that HashSet.
+	 */
+	private void removeDuplicateURLs(){
+		
+		HashSet<URL> hs = new HashSet<URL>();
+		hs.addAll(listOfWebsites);
+		listOfWebsites.clear();
+		listOfWebsites.addAll(hs);
+		
+	}
+	
 	public int iterateListWebsites(){
 		
 		
@@ -196,13 +214,15 @@ public class Client {
 		System.out.println("Path of output file: " + webTxt.getAbsolutePath() + "\n");
 				
 		List<URL> x = listOfWebsites;
+		
 		for (URL y : x){
 			
 			System.out.println("toExternalForm(): " + y.toExternalForm() + "\n");
 			
-			//TO-DO need to lock this statement
+			//TODO need to lock this statement
 			new ClientURLThread(y, fileWriter).start();
 			
+
 		}
 		
 		

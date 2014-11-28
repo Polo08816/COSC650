@@ -41,9 +41,7 @@ public class main {
 	   
 	    switch (optionChoice){
 	    	
-	    	case "1": //Client - List of Websites
-	    		
-	    		
+	    	case "1": //Client - List of Websites	    		
 	    		
 	    		Client listOfWebsites = new Client();
 	    		
