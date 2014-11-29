@@ -4,6 +4,7 @@ package launcher;
 import java.net.*;
 import java.io.*;
 
+import server.Server;
 import client.*;
 
 
@@ -18,6 +19,8 @@ public class main {
 		
 		System.out.println("1.  Client - List of Websites");
 		System.out.println("2.  Client - Local host - File transfer\n");
+		System.out.println("3.  Server - Local host - File transfer\n");
+		
 		
 		//  prompt the user to enter their choice
 	    System.out.print("Enter your option: ");
@@ -54,6 +57,13 @@ public class main {
 	    	case "2":
 	    		
 	    		
+	    		break;
+	    		
+	    	case "3": //Server -  - Local host - File transfer	    		
+	    		
+	    		Server.serve(args);
+	    		//listOfWebsites.debugIterateListWebsites();
+	    	
 	    		break;
 	    		
 	    	default:
