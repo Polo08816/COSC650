@@ -2,13 +2,12 @@ package server;
 
 import java.io.Serializable;
 
-//@SuppressWarnings("serial")
+@SuppressWarnings("serial")
 public class FileRequest implements Serializable {
  
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -2863969401328505967L;
 	private long seqNum;
     private long ackNum;
     public String filename; //file being transferred

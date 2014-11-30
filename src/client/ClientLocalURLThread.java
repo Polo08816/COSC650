@@ -2,6 +2,7 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import server.*;
 
 public class ClientLocalURLThread extends Thread{
 	
