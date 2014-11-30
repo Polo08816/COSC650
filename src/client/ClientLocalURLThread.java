@@ -150,13 +150,16 @@ public class ClientLocalURLThread extends Thread{
                 sock.receive(dataFromClient);
                 FileData fd = (FileData) ois.readObject();
                  
-                try {
-                    bos.write(fd.getData(),0,fd.getData().length);
-                    bos.close();
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                    bos.close();
-                    file.delete();
+                if((fd != null)&&(fd.getData() != null))
+                {
+	                try {
+	                    bos.write(fd.getData(),0,fd.getData().length);
+	                    bos.close();
+	                } catch (IOException e) {
+	                    System.out.println(e.getMessage());
+	                    bos.close();
+	                    file.delete();
+	                }
                 }
  
                 System.out.println(filename + " downloaded...");
