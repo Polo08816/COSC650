@@ -109,7 +109,7 @@ public class Server {
             	byte[] data = Files.readAllBytes(path);
             	
                 FileData fdToClient = new FileData(PACKET_SIZE, data);
-                System.out.println("fdToClient:" + fdToClient.getData());
+                //System.out.println("fdToClient:" + fdToClient.getData());
                 oos.writeObject(fdToClient);
                 oos.flush();
                  

@@ -150,7 +150,7 @@ public class ClientLocalURLThread extends Thread{
                 sock.receive(dataFromClient);
                 FileData fd = (FileData) ois.readObject();
 
-                System.out.println("fd:" + fd.getData());
+                //System.out.println("fd:" + fd.getData());
                 
                 if((fd != null)&&(fd.getData() != null))
                 {
