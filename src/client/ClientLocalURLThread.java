@@ -2,6 +2,7 @@ package client;
 
 import java.io.*;
 import java.net.*;
+
 import server.*;
 
 public class ClientLocalURLThread extends Thread{
@@ -10,8 +11,8 @@ public class ClientLocalURLThread extends Thread{
 	private static int portNum = 12345; 
     private static DatagramSocket sock;
     private static InetAddress server;
-    static int timeout = 2000; //in milliseconds
-    public final static int PACKET_SIZE = 1024;
+    private static int timeout = 2000; //in milliseconds
+    public final static int PACKET_SIZE = 65536;
      
     private static Acknowledgement ack;
      
@@ -95,7 +96,8 @@ public class ClientLocalURLThread extends Thread{
                     System.out.println(ack.getSeqNum() + "PID: Request Ack received...");
  
                 } catch (SocketTimeoutException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
+                	System.out.println("Request timedout! " + timeout + "ms");
                 }
             }
  
@@ -139,7 +141,7 @@ public class ClientLocalURLThread extends Thread{
             else if (direction.equals("down")) {
  
                 File tmp = new File (filename);
-                File file = new File ("D:\\COSC650" + tmp.getName());
+                File file = new File ("D:\\COSC650-" + tmp.getName());
                 
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -150,7 +152,7 @@ public class ClientLocalURLThread extends Thread{
                 sock.receive(dataFromClient);
                 FileData fd = (FileData) ois.readObject();
 
-                //System.out.println("fd:" + fd.getData());
+                System.out.println("File size: " + fd.getData().length);
                 
                 if((fd != null)&&(fd.getData() != null))
                 {
@@ -163,8 +165,12 @@ public class ClientLocalURLThread extends Thread{
 	                    file.delete();
 	                }
                 }
- 
-                System.out.println(filename + " downloaded...");
+                
+                String str = new String(fd.getData(), "UTF-8");
+                System.out.println("file content:");
+                System.out.println(str);                
+                System.out.println(filename + " file received.");
+                System.out.println("saved to " + file.getAbsolutePath());
                          
                 /***Send ack when data received***/
                 //Create ack and write to buffer
@@ -190,8 +196,15 @@ public class ClientLocalURLThread extends Thread{
 	 */
 	public ClientLocalURLThread(String FilePath){
 		super("ClientLocalURLThread");
-		this.FilePath = FilePath;
 		
+		String str[] = FilePath.split("\\s+");
+		this.FilePath = str[0];
+		if((str.length > 1)&&(str[1].length() > 0))
+		{
+			this.timeout =  Integer.valueOf(str[1]);
+		}
+		if(this.timeout <= 0)
+			this.timeout = 2000;
 	}
 	
 

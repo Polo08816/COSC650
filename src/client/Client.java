@@ -254,7 +254,7 @@ public void readListLocalAddresses(){
 		 */
 		listOfLocalAddresses = new ArrayList<String>();
 		
-		System.out.println("\nEnter a local file address:\n");
+		System.out.println("\nEnter a local file address and timeout value (ie. C:\\log.txt 1000):\n");
 		
 		BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in));
 		 

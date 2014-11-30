@@ -23,7 +23,7 @@ public class Server {
         int portNum = 12345;
         int timeout = 2000; //in milliseconds
         DatagramSocket sock = new DatagramSocket(portNum);
-        final int PACKET_SIZE = 1024;
+        final int PACKET_SIZE = 65536;
          
         System.out.println("FileServer Online");
         byte[] rxBuff = new byte[PACKET_SIZE];
