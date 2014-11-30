@@ -6,14 +6,14 @@ import java.net.*;
 public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
-	public static class Acknowledgement implements Serializable {
+	public static class cAcknowledgement implements Serializable {
 	    /**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 		private long seqNum;
 	     
-	    public Acknowledgement (long sn) {
+	    public cAcknowledgement (long sn) {
 	        this.seqNum = sn;
 	    }
 	     
@@ -22,7 +22,7 @@ public class ClientLocalURLThread extends Thread{
 	    }
 	}
 	
-	public static class FileData implements Serializable {
+	public static class cFileData implements Serializable {
 	    /**
 		 * 
 		 */
@@ -32,7 +32,7 @@ public class ClientLocalURLThread extends Thread{
 	    private int chunkSize;
 	    private byte[] data;
 	     
-	    public FileData (int chunk, byte[] data) {
+	    public cFileData (int chunk, byte[] data) {
 	        this.seqNum = System.currentTimeMillis();
 	        this.ackNum = 0; 
 	        this.chunkSize = chunk;
@@ -72,7 +72,7 @@ public class ClientLocalURLThread extends Thread{
 	    }
 	}
 	
-	public static class FileRequest implements Serializable {
+	public static class cFileRequest implements Serializable {
 		 
 	    /**
 		 * 
@@ -84,7 +84,7 @@ public class ClientLocalURLThread extends Thread{
 	    public String direction; //"up" or "down" are valid values for this
 	 
 	     
-	    public FileRequest (String fn, String dir) {
+	    public cFileRequest (String fn, String dir) {
 	        this.seqNum = System.currentTimeMillis();
 	        this.ackNum = 0;
 	        this.filename = fn;
@@ -117,7 +117,7 @@ public class ClientLocalURLThread extends Thread{
     static int timeout = 2000; //in milliseconds
     public final static int PACKET_SIZE = 1024;
      
-    private static Acknowledgement ack;
+    private static cAcknowledgement ack;
      
     private static ByteArrayInputStream bais;
     private static ObjectInputStream ois;
@@ -173,7 +173,7 @@ public class ClientLocalURLThread extends Thread{
             /**Create File request, convert to byte[] and fill txBuff**/
             baos = new ByteArrayOutputStream(PACKET_SIZE);
             oos = new ObjectOutputStream(new BufferedOutputStream(baos));
-            FileRequest fr = new FileRequest(filename, direction);
+            cFileRequest fr = new cFileRequest(filename, direction);
             oos.writeObject(fr);
             oos.flush();
             txBuff = baos.toByteArray();
@@ -194,7 +194,7 @@ public class ClientLocalURLThread extends Thread{
                     bais = new ByteArrayInputStream(rxBuff);
                     ois = new ObjectInputStream(bais);
                      
-                    ack = (Acknowledgement) ois.readObject();
+                    ack = (cAcknowledgement) ois.readObject();
                     requestSent = true;
                     System.out.println(ack.getSeqNum() + "PID: Request Ack received...");
  
@@ -215,7 +215,7 @@ public class ClientLocalURLThread extends Thread{
                     System.out.println(e.getMessage());         
                 }
                  
-                FileData fd = new FileData(blocksize, fileByteArray);
+                cFileData fd = new cFileData(blocksize, fileByteArray);
                 oos.writeObject(fd);
                 oos.flush();
                 txBuff = baos.toByteArray();
@@ -231,7 +231,7 @@ public class ClientLocalURLThread extends Thread{
          
                         bais = new ByteArrayInputStream(rxBuff);
                         ois = new ObjectInputStream(bais);                      
-                        ack = (Acknowledgement) ois.readObject();
+                        ack = (cAcknowledgement) ois.readObject();
                         dataSent = true;
                         System.out.println(ack.getSeqNum() + "PID: Data Ack received...");
  
@@ -250,7 +250,7 @@ public class ClientLocalURLThread extends Thread{
                 DatagramPacket dataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
                  
                 sock.receive(dataFromClient);
-                FileData fd = (FileData) ois.readObject();
+                cFileData fd = (cFileData) ois.readObject();
                  
                 try {
                     bos.write(fd.getData(),0,fd.getData().length);
@@ -265,7 +265,7 @@ public class ClientLocalURLThread extends Thread{
                          
                 /***Send ack when data received***/
                 //Create ack and write to buffer
-                ack = new Acknowledgement(fd.getSeqNum());
+                ack = new cAcknowledgement(fd.getSeqNum());
                 oos.writeObject(ack);
                 oos.flush();
                  
