@@ -7,7 +7,11 @@ public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
 	public static class Acknowledgement implements Serializable {
-	    private long seqNum;
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private long seqNum;
 	     
 	    public Acknowledgement (long sn) {
 	        this.seqNum = sn;
@@ -19,7 +23,11 @@ public class ClientLocalURLThread extends Thread{
 	}
 	
 	public static class FileData implements Serializable {
-	    private long seqNum;
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private long seqNum;
 	    private long ackNum;
 	    private int chunkSize;
 	    private byte[] data;
@@ -66,7 +74,11 @@ public class ClientLocalURLThread extends Thread{
 	
 	public static class FileRequest implements Serializable {
 		 
-	    private long seqNum;
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private long seqNum;
 	    private long ackNum;
 	    public String filename; //file being transferred
 	    public String direction; //"up" or "down" are valid values for this
