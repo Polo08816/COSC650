@@ -6,118 +6,13 @@ import java.net.*;
 public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
-	public static class cAcknowledgement implements Serializable {
-	    /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private long seqNum;
-	     
-	    public cAcknowledgement (long sn) {
-	        this.seqNum = sn;
-	    }
-	     
-	    public long getSeqNum() {
-	        return seqNum;
-	    }
-	}
-	
-	public static class cFileData implements Serializable {
-	    /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private long seqNum;
-	    private long ackNum;
-	    private int chunkSize;
-	    private byte[] data;
-	     
-	    public cFileData (int chunk, byte[] data) {
-	        this.seqNum = System.currentTimeMillis();
-	        this.ackNum = 0; 
-	        this.chunkSize = chunk;
-	        this.data = data;
-	    }
-	     
-	    public long getSeqNum () {
-	        return seqNum;
-	    }
-	     
-	    public void setSeqNum (long sn) {
-	        this.seqNum = sn;
-	    }
-	     
-	    public long getAckNum () {
-	        return ackNum;
-	    }
-	     
-	    public void setAckNum (long an) {
-	        ackNum = an;
-	    }
-	     
-	    public int getChunkSize () {
-	        return chunkSize;
-	    }
-	     
-	    public void setChunkSize (int cs) {
-	        chunkSize = cs;
-	    }
-	     
-	    public byte[] getData () {
-	        return data;
-	    }
-	     
-	    public void setData (byte[] d) {
-	        this.data = d;
-	    }
-	}
-	
-	public static class cFileRequest implements Serializable {
-		 
-	    /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private long seqNum;
-	    private long ackNum;
-	    public String filename; //file being transferred
-	    public String direction; //"up" or "down" are valid values for this
-	 
-	     
-	    public cFileRequest (String fn, String dir) {
-	        this.seqNum = System.currentTimeMillis();
-	        this.ackNum = 0;
-	        this.filename = fn;
-	        this.direction = dir;
-	    }
-	 
-	    public long getSeqNum () {
-	        return seqNum;
-	    }
-	     
-	    public void setSeqNum (long sn) {
-	        this.seqNum = sn;
-	    }
-	     
-	    public long getAckNum () {
-	        return ackNum;
-	    }
-	     
-	    public void setAckNum (long an) {
-	        ackNum = an;
-	    }
-	 
-	}
-	
-	
-	
 	private static int portNum = 12345; 
     private static DatagramSocket sock;
     private static InetAddress server;
     static int timeout = 2000; //in milliseconds
     public final static int PACKET_SIZE = 1024;
      
-    private static cAcknowledgement ack;
+    private static Acknowledgement ack;
      
     private static ByteArrayInputStream bais;
     private static ObjectInputStream ois;
@@ -173,7 +68,7 @@ public class ClientLocalURLThread extends Thread{
             /**Create File request, convert to byte[] and fill txBuff**/
             baos = new ByteArrayOutputStream(PACKET_SIZE);
             oos = new ObjectOutputStream(new BufferedOutputStream(baos));
-            cFileRequest fr = new cFileRequest(filename, direction);
+            FileRequest fr = new FileRequest(filename, direction);
             oos.writeObject(fr);
             oos.flush();
             txBuff = baos.toByteArray();
@@ -194,7 +89,7 @@ public class ClientLocalURLThread extends Thread{
                     bais = new ByteArrayInputStream(rxBuff);
                     ois = new ObjectInputStream(bais);
                      
-                    ack = (cAcknowledgement) ois.readObject();
+                    ack = (Acknowledgement) ois.readObject();
                     requestSent = true;
                     System.out.println(ack.getSeqNum() + "PID: Request Ack received...");
  
@@ -215,7 +110,7 @@ public class ClientLocalURLThread extends Thread{
                     System.out.println(e.getMessage());         
                 }
                  
-                cFileData fd = new cFileData(blocksize, fileByteArray);
+                FileData fd = new FileData(blocksize, fileByteArray);
                 oos.writeObject(fd);
                 oos.flush();
                 txBuff = baos.toByteArray();
@@ -231,7 +126,7 @@ public class ClientLocalURLThread extends Thread{
          
                         bais = new ByteArrayInputStream(rxBuff);
                         ois = new ObjectInputStream(bais);                      
-                        ack = (cAcknowledgement) ois.readObject();
+                        ack = (Acknowledgement) ois.readObject();
                         dataSent = true;
                         System.out.println(ack.getSeqNum() + "PID: Data Ack received...");
  
@@ -250,7 +145,7 @@ public class ClientLocalURLThread extends Thread{
                 DatagramPacket dataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
                  
                 sock.receive(dataFromClient);
-                cFileData fd = (cFileData) ois.readObject();
+                FileData fd = (FileData) ois.readObject();
                  
                 try {
                     bos.write(fd.getData(),0,fd.getData().length);
@@ -265,7 +160,7 @@ public class ClientLocalURLThread extends Thread{
                          
                 /***Send ack when data received***/
                 //Create ack and write to buffer
-                ack = new cAcknowledgement(fd.getSeqNum());
+                ack = new Acknowledgement(fd.getSeqNum());
                 oos.writeObject(ack);
                 oos.flush();
                  
