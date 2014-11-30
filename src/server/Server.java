@@ -43,8 +43,14 @@ public class Server {
              
             bais = new ByteArrayInputStream(rxBuff);
             ois = new ObjectInputStream(bais);
-             
-            FileRequest fr = (FileRequest) ois.readObject();
+
+            FileRequest fr = null;
+            try {
+            	fr = (FileRequest) ois.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
             System.out.println(fr.filename + " " + fr.direction + "load requested..."); 
              
              

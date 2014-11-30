@@ -2,10 +2,14 @@ package client;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
+//@SuppressWarnings("serial")
 public class FileRequest implements Serializable {
  
-    private long seqNum;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4050676659777750826L;
+	private long seqNum;
     private long ackNum;
     public String filename; //file being transferred
     public String direction; //"up" or "down" are valid values for this
