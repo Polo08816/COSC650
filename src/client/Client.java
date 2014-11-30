@@ -13,6 +13,7 @@ public class Client {
 	
 	//relative path for output file of HTML since HTML has trouble fitting into the console window
 	public static final String webhtmlOutput = "output/websitehtml.txt";
+	public static final String webhtmlFolder = "output";
 		
 	/**
 	 * Constructor for Client.
@@ -200,10 +201,14 @@ public class Client {
 		/*
 		 * Write output of HTP GET request to file.
 		 */
-		File webTxt = new File(webhtmlOutput);
+		File webTxt = null;
 		
 		try {
-			webTxt.createNewFile();
+			// createNewFile() will not create directories
+			webTxt = new File(webhtmlFolder);
+			webTxt.mkdirs();
+			webTxt = new File(webhtmlOutput);
+			webTxt.createNewFile(); 
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			System.out.println("\nCould not create new file.\n");
