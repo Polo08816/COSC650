@@ -1,7 +1,6 @@
 package launcher;
 
 
-import java.net.*;
 import java.io.*;
 
 import server.Server;
@@ -18,7 +17,7 @@ public class main {
 		System.out.println("Please selection from the following options...\n");
 		
 		System.out.println("1.  Client - List of Websites");
-		System.out.println("2.  Client - Local host - File transfer\n");
+		System.out.println("2.  Client - Local host - File transfer");
 		System.out.println("3.  Server - Local host - File transfer\n");
 		
 		
