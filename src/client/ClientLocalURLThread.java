@@ -5,7 +5,7 @@ import java.net.*;
 
 public class ClientLocalURLThread extends Thread{
 	
-	
+	private String FilePath;
 	public static class Acknowledgement implements Serializable {
 	    private long seqNum;
 	     
@@ -273,16 +273,15 @@ public class ClientLocalURLThread extends Thread{
 	 * 
 	 * @param urlFromClient
 	 */
-	public ClientLocalURLThread(URL urlFromClient, FileWriter fw){
+	public ClientLocalURLThread(String FilePath){
 		super("ClientLocalURLThread");
-		//this.link = urlFromClient;
-		//this.fileWriter = fw;
+		this.FilePath = FilePath;
 		
 	}
 	
 
 	public void run(){
-		String args[] = {"down", "received.txt", "65535"};
+		String args[] = {"down", FilePath, "65535"};
 		try {
 			main(args);
 		} catch (ClassNotFoundException e) {

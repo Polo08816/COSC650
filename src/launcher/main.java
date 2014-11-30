@@ -55,6 +55,10 @@ public class main {
 	    		
 	    	case "2":
 	    		
+	    		Client listOfLocalAddresses = new Client();
+	    		
+	    		//reads a list of websites from command line
+	    		listOfLocalAddresses.readListLocalAddresses();
 	    		
 	    		break;
 	    		

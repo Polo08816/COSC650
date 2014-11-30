@@ -17,7 +17,7 @@ public class Server {
     static HashMap<String, byte[]> files = new HashMap<String, byte[]>();
  
     public static void serve (String args[]) throws IOException, ClassNotFoundException  {
-        int portNum = 5000;
+        int portNum = 12345;
         int timeout = 2000; //in milliseconds
         DatagramSocket sock = new DatagramSocket(portNum);
         final int PACKET_SIZE = 1024;
