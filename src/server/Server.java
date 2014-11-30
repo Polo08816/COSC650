@@ -10,6 +10,9 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
  
 public class Server {
@@ -102,7 +105,11 @@ public class Server {
             else if (fr.direction.equals("down")) {
                 // Send data
                 //wait for ack
-                FileData fdToClient = new FileData(PACKET_SIZE, files.get(fr.filename));
+            	Path path = Paths.get(fr.filename);
+            	byte[] data = Files.readAllBytes(path);
+            	
+                FileData fdToClient = new FileData(PACKET_SIZE, data);
+                System.out.println("fdToClient:" + fdToClient.getData());
                 oos.writeObject(fdToClient);
                 oos.flush();
                  

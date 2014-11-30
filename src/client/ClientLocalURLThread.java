@@ -146,10 +146,12 @@ public class ClientLocalURLThread extends Thread{
                  
                 /***Receive data***/
                 DatagramPacket dataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
-                 
+                
                 sock.receive(dataFromClient);
                 FileData fd = (FileData) ois.readObject();
-                 
+
+                System.out.println("fd:" + fd.getData());
+                
                 if((fd != null)&&(fd.getData() != null))
                 {
 	                try {
