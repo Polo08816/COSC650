@@ -138,7 +138,9 @@ public class ClientLocalURLThread extends Thread{
             }
             else if (direction.equals("down")) {
  
-                File file = new File (filename);    
+                File tmp = new File (filename);
+                File file = new File ("D:\\COSC650" + tmp.getName());
+                
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                  
