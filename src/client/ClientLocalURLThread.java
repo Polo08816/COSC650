@@ -23,7 +23,7 @@ public class ClientLocalURLThread extends Thread{
      
     static boolean validArgs = false;
      
-    public static void main(String args[]) throws IOException, ClassNotFoundException {
+    public static void recieve(String args[]) throws IOException, ClassNotFoundException {
          
         //String direction = "up";
         //String direction = "down";
@@ -211,7 +211,7 @@ public class ClientLocalURLThread extends Thread{
 	public void run(){
 		String args[] = {"down", FilePath, "65535"};
 		try {
-			main(args);
+			recieve(args);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
