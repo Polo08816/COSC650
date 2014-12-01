@@ -1,6 +1,3 @@
-/**
- * 
- */
 package server;
 
 /**
@@ -26,17 +23,18 @@ public class Server {
         final int PACKET_SIZE = 65536;
          
         System.out.println("FileServer Online");
-        byte[] rxBuff = new byte[PACKET_SIZE];
-        byte[] txBuff = new byte[PACKET_SIZE];
- 
-        ByteArrayInputStream bais;
-        ObjectInputStream ois;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(PACKET_SIZE);
-        ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
-        oos.flush();
-         
+
         while(true) {
-             
+
+            byte[] rxBuff = new byte[PACKET_SIZE];
+            byte[] txBuff = new byte[PACKET_SIZE];
+     
+            ByteArrayInputStream bais;
+            ObjectInputStream ois;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(PACKET_SIZE); 
+        	ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
+        	oos.flush();
+        	
             System.out.println("Waiting for Requests...");
              
             // Wait for requests
