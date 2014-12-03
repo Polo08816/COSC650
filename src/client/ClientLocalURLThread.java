@@ -23,6 +23,13 @@ public class ClientLocalURLThread extends Thread{
      
     static boolean validArgs = false;
      
+    /**
+     * (One sentence summary describing receive).
+     * 
+     * @param args
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void recieve(String args[]) throws IOException, ClassNotFoundException {
          
         //String direction = "up";

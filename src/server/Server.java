@@ -16,6 +16,13 @@ public class Server {
  
     static HashMap<String, byte[]> files = new HashMap<String, byte[]>();
  
+    /**
+     * (One sentence summary describing serve).
+     * 
+     * @param args
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void serve (String args[]) throws IOException, ClassNotFoundException  {
         int portNum = 12345;
         int timeout = 2000; //in milliseconds
