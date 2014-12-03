@@ -32,38 +32,20 @@ public class ClientLocalURLThread extends Thread{
      */
     public static void recieve(String args[]) throws IOException, ClassNotFoundException {
          
-        //String direction = "up";
-        //String direction = "down";
-        //String filename = "test1.txt";
-        //int blocksize = 8;
-
+        //String direction = up/down
         String direction = args[0];
         String filename = args[1];
         int blocksize = Integer.parseInt(args[2]); 
         
-        /******************
-        String direction = args[0];
-        String filename = args[1];
-        int blocksize = Integer.parseInt(args[2]); 
-        *******************/
-         
-        if ( direction.equals("up") && (blocksize > 0) ) {
-            File file = new File (filename);
-            if (!file.exists()) {
-                System.out.println("Args Error: file does not exist");
-            }
-            else if (blocksize <= file.length()) {
-                 validArgs = true;
-            } else {
-                 System.out.println("Args Error: blocksize (" + blocksize + ") greater than filesize (" + file.length() + ")");             
-            }
-        } else if ( direction.equals("down") && blocksize > 0 ) {
+        // Ensure arguments are valid 
+        if ( direction.equals("down") && blocksize > 0 ) {
              validArgs = true;          
         } else {
              validArgs = false; 
              System.out.println("Args Error: invalid direction or negative blocksize");
         }
          
+        // If argurments are valid create connection settings
         if (validArgs) {
             server = InetAddress.getByName("localhost");
             sock = new DatagramSocket();
@@ -107,48 +89,13 @@ public class ClientLocalURLThread extends Thread{
                 	System.out.println("Request timedout! " + timeout + "ms");
                 }
             }
- 
-            if (direction.equals("up")) {
-                byte[] fileByteArray = new byte[blocksize];
-                try {
-                    FileInputStream fis = new FileInputStream(filename);
-                    BufferedInputStream bis = new BufferedInputStream(fis);
-                    bis.read(fileByteArray,0,fileByteArray.length);
-                } catch (FileNotFoundException e) {
-                    System.out.println("Client Error: File not found");
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());         
-                }
-                 
-                FileData fd = new FileData(blocksize, fileByteArray);
-                oos.writeObject(fd);
-                oos.flush();
-                txBuff = baos.toByteArray();
- 
-                /**Send data, if reply not received within 2 seconds, resend**/
-                boolean dataSent = false;
-                while (dataSent == false) {
-                    try {
-                        sock.send(fdPacket);
-                        System.out.println(fd.getSeqNum() + "PID: " + filename + " sent...");
-                         
-                        sock.receive(ackPacket);
-         
-                        bais = new ByteArrayInputStream(rxBuff);
-                        ois = new ObjectInputStream(bais);                      
-                        ack = (Acknowledgement) ois.readObject();
-                        dataSent = true;
-                        System.out.println(ack.getSeqNum() + "PID: Data Ack received...");
- 
-                    } catch (SocketTimeoutException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            else if (direction.equals("down")) {
- 
+            
+            // Download File
+            if (direction.equals("down")) {
+            	
+            	// Create the file and place it in the directory listed
                 File tmp = new File (filename);
-                File file = new File ("F:\\COSC650-" + tmp.getName());
+                File file = new File ("D:\\COSC650-" + tmp.getName());
                 
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -156,11 +103,14 @@ public class ClientLocalURLThread extends Thread{
                 /***Receive data***/
                 DatagramPacket dataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
                 
+                // Recieve the data and create an object with the information
                 sock.receive(dataFromClient);
                 FileData fd = (FileData) ois.readObject();
-
+                
+                // Print file data to console
                 System.out.println("File size: " + fd.getData().length);
                 
+                // Write the data to the file
                 if((fd != null)&&(fd.getData() != null))
                 {
 	                try {
@@ -173,6 +123,7 @@ public class ClientLocalURLThread extends Thread{
 	                }
                 }
                 
+                // Print file data to console
                 String str = new String(fd.getData(), "UTF-8");
                 System.out.println("file content:");
                 System.out.println(str);                
