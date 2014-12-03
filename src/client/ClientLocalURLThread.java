@@ -95,7 +95,15 @@ public class ClientLocalURLThread extends Thread{
             	
             	// Create the file and place it in the directory listed
                 File tmp = new File (filename);
-                File file = new File ("D:\\COSC650-" + tmp.getName());
+                //File file = new File ("D:\\COSC650-" + tmp.getName());
+                
+                //create file in relative path - this file will be placed in the "output" folder
+                File file = new File("output/" +tmp.getName());
+                if(!file.exists()){
+                	file.mkdir(); //creates folder if it does not exist
+                }
+                
+                
                 
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
