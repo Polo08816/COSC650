@@ -117,6 +117,10 @@ public class Server {
             		byte[] xferData = Arrays.copyOfRange(data, start, end);
             				
 	                FileData fdToClient = new FileData(PACKET_SIZE, xferData);
+	                
+	                //inserting and setting total file size into the FileData packet
+	                fdToClient.setTotalFileSize(ln);
+	                
 	                //System.out.println("fdToClient:" + fdToClient.getData());
 	                oos.writeObject(fdToClient);
 	                oos.flush();

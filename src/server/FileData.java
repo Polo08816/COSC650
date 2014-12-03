@@ -9,6 +9,14 @@ public class FileData implements Serializable {
     private long ackNum;
     private int chunkSize;
     private byte[] data;
+    
+    /*
+     * Provides total size of file in all FileData packets.
+     * Implementation is easier to adapt to what we currently have
+     * and bandwidth waste is not a concern for local host at the
+     * moment.
+     */
+    private int totalFileSize;
      
     public FileData (int chunk, byte[] data) {
         this.seqNum = System.currentTimeMillis();
@@ -48,4 +56,22 @@ public class FileData implements Serializable {
     public void setData (byte[] d) {
         this.data = d;
     }
+
+	/**
+	 * Returns the total size of the file that this packet is a part of.
+	 * 
+	 * @return
+	 */
+	public int getTotalFileSize() {
+		return totalFileSize;
+	}
+
+	/**
+	 * Allows the server to set the total size of the file that this packet is a part of.
+	 * 
+	 * @param totalFileSize
+	 */
+	public void setTotalFileSize(int totalFileSize) {
+		this.totalFileSize = totalFileSize;
+	}
 }
