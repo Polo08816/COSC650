@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Arrays;
  
 public class Server {
  
@@ -27,7 +28,8 @@ public class Server {
         int portNum = 12345;
         int timeout = 2000; //in milliseconds
         DatagramSocket sock = new DatagramSocket(portNum);
-        final int PACKET_SIZE = 65536;
+        final int PACKET_SIZE = 1024;
+        final int MAX_FILE_SIZE = 65536;
          
         System.out.println("FileServer Online");
 
@@ -112,25 +114,111 @@ public class Server {
                 //wait for ack
             	Path path = Paths.get(fr.filename);
             	byte[] data = Files.readAllBytes(path);
+            	int ln = data.length;
+            	if (ln>MAX_FILE_SIZE){
+            		throw new IOException("File size too large");
+            	}
+            	int completePackets = ln/PACKET_SIZE;
+            	if (ln%PACKET_SIZE > 1){
+            		completePackets = completePackets + 1;
+            	}
             	
-                FileData fdToClient = new FileData(PACKET_SIZE, data);
-                //System.out.println("fdToClient:" + fdToClient.getData());
-                oos.writeObject(fdToClient);
-                oos.flush();
-                 
-                txBuff = baos.toByteArray();
-                DatagramPacket dataToClient = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
-                 
-                sock.send(dataToClient);
-                System.out.println(fr.filename + " sent...");
- 
-                // Receive ack when data sent
-                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
-                sock.receive(ackPacket);
-                 
-                ack = (Acknowledgement) ois.readObject();
-                System.out.println(ack.getSeqNum() + " Ack received...");
-                 
+            	for (int i = 1; i < completePackets; i++ ){
+            		int start;
+            		if (i == 1){
+            			start = 0;
+            		}
+            		else start = (1 * i);
+            		int end = 1024 * i;
+            		
+            		byte[] xferData = Arrays.copyOfRange(data, start, end);
+            				
+	                FileData fdToClient = new FileData(PACKET_SIZE, xferData);
+	                //System.out.println("fdToClient:" + fdToClient.getData());
+	                oos.writeObject(fdToClient);
+	                oos.flush();
+	                 
+	                txBuff = baos.toByteArray();
+	                DatagramPacket dataToClient = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+	                 
+	                sock.send(dataToClient);
+	                System.out.println(fr.filename + " sent...");
+	                while (true){
+		                try{
+		                // Receive ack when data sent
+		                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+		                sock.receive(ackPacket);
+		                 
+		                ack = (Acknowledgement) ois.readObject();
+		                System.out.println(ack.getSeqNum() + " Ack received...");
+		                break;
+		                }
+		                catch (IOException e){
+		                	System.out.println("Transmission Error, retrying packet");
+		                	
+		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
+			                //System.out.println("fdToClient:" + fdToClient.getData());
+			                oos.writeObject(retryfdToClient);
+			                oos.flush();
+			                 
+			                txBuff = baos.toByteArray();
+			                DatagramPacket retryDataToClient = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+			                 
+			                sock.send(retryDataToClient);
+			                System.out.println(fr.filename + " sent...");
+		                }
+	                }
+            	}
+            	
+            	if (ln%PACKET_SIZE > 1){
+            		int start = 1*completePackets;
+            		int end = start +(ln%PACKET_SIZE);
+            		
+            		byte[] xferData = Arrays.copyOfRange(data, start, end);
+            				
+	                FileData fdToClient = new FileData(PACKET_SIZE, xferData);
+	                //System.out.println("fdToClient:" + fdToClient.getData());
+	                oos.writeObject(fdToClient);
+	                oos.flush();
+	                 
+	                txBuff = baos.toByteArray();
+	                DatagramPacket dataToClient = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+	                 
+	                sock.send(dataToClient);
+	                System.out.println(fr.filename + " sent...");
+	 
+	                // Receive ack when data sent
+	                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+	                sock.receive(ackPacket);
+	                 
+	                ack = (Acknowledgement) ois.readObject();
+	                System.out.println(ack.getSeqNum() + " Ack received...");
+	                while (true){
+		                try{
+		                // Receive ack when data sent
+		                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+		                sock.receive(ackPacket);
+		                 
+		                ack = (Acknowledgement) ois.readObject();
+		                System.out.println(ack.getSeqNum() + " Ack received...");
+		                break;
+		                }
+		                catch (IOException e){
+		                	System.out.println("Transmission Error, retrying packet");
+		                	
+		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
+			                //System.out.println("fdToClient:" + fdToClient.getData());
+			                oos.writeObject(retryfdToClient);
+			                oos.flush();
+			                 
+			                txBuff = baos.toByteArray();
+			                DatagramPacket retryDataToClient = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+			                 
+			                sock.send(retryDataToClient);
+			                System.out.println(fr.filename + " sent...");
+		                }
+	                }
+            	}
             }
              
             System.out.println("Files on server: " + Server.files.toString());
