@@ -100,7 +100,7 @@ public class ClientLocalURLThread extends Thread{
             	int currentPacket;
             	int dataStart;
             	int dataEnd;
-            	byte[] fileData;
+            	
             	
             	// Create the file and place it in the directory listed
                 File tmp = new File (filename);
@@ -127,7 +127,8 @@ public class ClientLocalURLThread extends Thread{
                 currentPacket = fd.getPacketSeqNum();
                 dataStart = fd.getStart();
                 dataEnd = fd.getEnd();
-                fileData = fd.getData();
+                byte[] fileData = new byte[totalSize];
+                System.arraycopy(fd.getData(), 0, fileData, dataStart, fd.getData().length);
                 recievedPackets[currentPacket-1]=currentPacket;
                 
                 System.out.println("Packet received.");
@@ -147,9 +148,6 @@ public class ClientLocalURLThread extends Thread{
                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                 
                 for (int i = 2; i <= numPackets;i++){
-                    
-                	byte[] oldFileData;
-                	oldFileData = fileData;
                 	
                 	/***Receive data***/
                     DatagramPacket moreDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
@@ -163,7 +161,7 @@ public class ClientLocalURLThread extends Thread{
                     
                     if (currentPacket != i){
                     	if (currentPacket < i){
-                    		if (recievedPackets[currentPacket] != 0){
+                    		if (recievedPackets[currentPacket-1] != 0){
                     			System.out.println("packet has already been recieved.");
                     			
                                 /***Send ack when data received***/
@@ -181,14 +179,11 @@ public class ClientLocalURLThread extends Thread{
                                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                     			
                     		}
-                    		else if (recievedPackets[currentPacket] == 0 && recievedPackets[currentPacket+1] == 0){
+                    		else if (recievedPackets[currentPacket-1] == 0 && recievedPackets[currentPacket+1] == 0){
                     			
                                 dataStart = mfd.getStart();
                                 dataEnd = mfd.getEnd();
-                                byte[] newFileData = new byte[oldFileData.length + mfd.getData().length];
-                                System.arraycopy(oldFileData, 0, newFileData, 0, oldFileData.length);
-                                System.arraycopy(mfd.getData(), 0, newFileData, oldFileData.length, mfd.getData().length);
-                                fileData = newFileData;
+                                System.arraycopy(mfd.getData(), 0, fileData, mfd.getStart(), mfd.getData().length);
                                 
                                 System.out.println("Packet received.");
                                 
@@ -211,7 +206,7 @@ public class ClientLocalURLThread extends Thread{
                     	else;
                     }
                     else{
-                    	if (recievedPackets[currentPacket] != 0){
+                    	if (recievedPackets[currentPacket-1] != 0){
                 			System.out.println("packet has already been recieved.");
                 			
                             /***Send ack when data received***/
@@ -231,10 +226,7 @@ public class ClientLocalURLThread extends Thread{
                     	else{
                     		dataStart = mfd.getStart();
                             dataEnd = mfd.getEnd();
-                            byte[] newFileData = new byte[oldFileData.length + mfd.getData().length];
-                            System.arraycopy(oldFileData, 0, newFileData, 0, oldFileData.length);
-                            System.arraycopy(mfd.getData(), 0, newFileData, oldFileData.length, mfd.getData().length);
-                            fileData = newFileData;
+                            System.arraycopy(mfd.getData(), 0, fileData, mfd.getStart(), mfd.getData().length);
                             
                             System.out.println("Packet received.");
                             
@@ -261,7 +253,7 @@ public class ClientLocalURLThread extends Thread{
                 	bos.close();
                 	throw new IOException("Files do not match. Please retry.");
                 }
-                System.out.println("File size: " + fd.getData().length);
+                System.out.println("File size: " + fileData.length);
                 
 	            try {
 	                bos.write(fileData,0,fileData.length);
