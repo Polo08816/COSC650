@@ -117,12 +117,12 @@ public class ClientLocalURLThread extends Thread{
                 // Extract file data from packet
                 totalSize = fd.getTotalFileSize(); // Total size of the file it is sending
                 numPackets = fd.getTotalPackets(); // Total number of packets to be sent
-                int[] recievedPackets= new int[numPackets]; // An array keeping track of what packets have arrived
+                int[] recievedPackets= new int[numPackets+1]; // An array keeping track of what packets have arrived
                 currentPacket = fd.getPacketSeqNum(); // A tracker for the current packet
                 dataStart = fd.getStart(); // The starting byte number of the current packet
                 byte[] fileData = new byte[totalSize]; // The new byte array that will accept the incoming packets
                 System.arraycopy(fd.getData(), 0, fileData, dataStart, fd.getData().length);  // Copy the incoming packet into the byte array
-                recievedPackets[currentPacket-1]=currentPacket; // Acknowledge that the packet was recieved.
+                recievedPackets[currentPacket]=currentPacket; // Acknowledge that the packet was received.
                 
                 // Acknowledge that the packet was received
                 System.out.println("Packet received.");
@@ -141,9 +141,9 @@ public class ClientLocalURLThread extends Thread{
                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                 
                 // Loop through each additional packet
-                for (int i = 2; i <= numPackets;i++){
+                for (int i = 1; i < numPackets+1;i++){
                 	
-                	// Recieve the data and create an object with the information
+                	// Receive the data and create an object with the information
                     DatagramPacket moreDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
                     sock.receive(moreDataFromClient);
                     FileData mfd = (FileData) ois.readObject();
@@ -154,7 +154,7 @@ public class ClientLocalURLThread extends Thread{
                     // Check if the packet is where it should be. 
                     if (currentPacket != i){
                     	if (currentPacket < i){   // If the packet is 1 behind... 
-                    		if (recievedPackets[currentPacket-1] != 0){        // Check to see if the value was already written. If it was ack it and notify the user.
+                    		if (recievedPackets[currentPacket] != 0){        // Check to see if the value was already written. If it was ack it and notify the user.
                     			System.out.println("packet has already been recieved.");
                     			
                                 /***Send ack when data received***/
@@ -172,7 +172,7 @@ public class ClientLocalURLThread extends Thread{
                                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                     			
                     		}
-                    		else if (recievedPackets[currentPacket-1] == 0 && recievedPackets[currentPacket+1] == 0){   // Otherwise update the data and ack the server
+                    		else if (recievedPackets[currentPacket] == 0 && recievedPackets[currentPacket+1] == 0){   // Otherwise update the data and ack the server
                     			
                                 dataStart = mfd.getStart();
                                 System.arraycopy(mfd.getData(), 0, fileData, mfd.getStart(), mfd.getData().length);
@@ -199,7 +199,7 @@ public class ClientLocalURLThread extends Thread{
                     }
                     else{
                     	// If the current packet already has a value. Notify the user at the console and ack the server.
-                    	if (recievedPackets[currentPacket-1] != 0){  
+                    	if (recievedPackets[currentPacket] != 0){  
                 			System.out.println("packet has already been recieved.");
                 			
                             /***Send ack when data received***/

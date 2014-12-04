@@ -95,24 +95,19 @@ public class Server {
             	byte[] data = Files.readAllBytes(path);
             	int ln = data.length;
             	
+            	System.out.println("File size = " + ln);
+            	
             	// Throw exception if the file is too big
             	if (ln>MAX_FILE_SIZE){
             		throw new IOException("File size too large");
             	}
             	// Determine number of packets needed
             	int completePackets = ln/PACKET_SIZE;
-            	if (ln%PACKET_SIZE > 1){
-            		completePackets = completePackets + 1;
-            	}
             	
             	// Send data for each packet that is 1024
-            	for (int i = 1; i < completePackets; i++ ){
-            		int start;
-            		if (i == 1){
-            			start = 0;
-            		}
-            		else start = (1 * i);
-            		int end = 1024 * i;
+            	for (int i = 0; i < completePackets; i++ ){
+            		int start = (PACKET_SIZE * i);
+            		int end = 1024 * (i+1);
             		
             		byte[] xferData = Arrays.copyOfRange(data, start, end);
             				
@@ -171,19 +166,21 @@ public class Server {
             	}
             	
             	// Send final packet
-            	if (ln%PACKET_SIZE > 1){
-            		int start = 1*completePackets;
-            		int end = start +(ln%PACKET_SIZE);
+            	if (ln - (completePackets*PACKET_SIZE) > 0){
+            		int start = completePackets*PACKET_SIZE;
+            		int len = (ln - (completePackets*PACKET_SIZE));
+            		int end = start + len;
             		
             		byte[] xferData = Arrays.copyOfRange(data, start, end);
             				
-	                FileData fdToClient = new FileData(PACKET_SIZE, xferData);
+	                FileData fdToClient = new FileData(len, xferData);
 	                //System.out.println("fdToClient:" + fdToClient.getData());
 	                
 	                //inserting and setting total file size, sequence number, and total number of packets into the FileData packet
 	                fdToClient.setTotalFileSize(ln);
 	                fdToClient.setPacketSeqNum(completePackets);
 	                fdToClient.setTotalPackets(completePackets);
+	                fdToClient.setStart(start);
 	                
 	                oos.writeObject(fdToClient);
 	                oos.flush();
@@ -221,7 +218,7 @@ public class Server {
 		                	}else kill = kill + 1;
 		                	System.out.println("Transmission Error, retrying packet");
 		                	
-		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
+		                	FileData retryfdToClient = new FileData(len, xferData);
 			                //System.out.println("fdToClient:" + fdToClient.getData());
 			                oos.writeObject(retryfdToClient);
 			                oos.flush();
