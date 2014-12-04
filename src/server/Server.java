@@ -122,6 +122,8 @@ public class Server {
 	                fdToClient.setTotalFileSize(ln);
 	                fdToClient.setPacketSeqNum(i);
 	                fdToClient.setTotalPackets(completePackets);
+	                fdToClient.setStart(start);
+	                fdToClient.setEnd(end);
 	                
 	                //System.out.println("fdToClient:" + fdToClient.getData());
 	                oos.writeObject(fdToClient);
