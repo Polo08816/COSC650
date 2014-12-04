@@ -2,14 +2,13 @@ package client;
 
 import java.io.*;
 import java.net.*;
-import java.util.Arrays;
 
 import server.*;
 
 public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
-	private static String outputPath = "D:\\output\\COSC650-";
+	private static String outputPath = "output/fromServer-";
 	private static int portNum = 12345; 
     private static DatagramSocket sock;
     private static InetAddress server;
@@ -68,7 +67,6 @@ public class ClientLocalURLThread extends Thread{
              
             DatagramPacket reqPacket = new DatagramPacket(txBuff, txBuff.length, server, portNum ); //holds request packets
             DatagramPacket ackPacket = new DatagramPacket(rxBuff, rxBuff.length, server, portNum ); //holds acknowledgement packets
-            DatagramPacket fdPacket = new DatagramPacket(txBuff, txBuff.length, server, portNum );  //holds file data packets
              
             /**Send request, if reply not received within 2 seconds, resend**/
             boolean requestSent = false;
@@ -99,8 +97,6 @@ public class ClientLocalURLThread extends Thread{
             	int totalSize;
             	int currentPacket;
             	int dataStart;
-            	int dataEnd;
-            	
             	
             	// Create the file and place it in the directory listed
                 File tmp = new File (filename);
@@ -113,27 +109,24 @@ public class ClientLocalURLThread extends Thread{
                 FileOutputStream fos = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                  
-                /***Receive data***/
+                // Receive the initial packet and create an object with the information
                 DatagramPacket initialDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
-                
-                // Recieve the data and create an object with the information
                 sock.receive(initialDataFromClient);
-                
                 FileData fd = (FileData) ois.readObject();
+
+                // Extract file data from packet
+                totalSize = fd.getTotalFileSize(); // Total size of the file it is sending
+                numPackets = fd.getTotalPackets(); // Total number of packets to be sent
+                int[] recievedPackets= new int[numPackets]; // An array keeping track of what packets have arrived
+                currentPacket = fd.getPacketSeqNum(); // A tracker for the current packet
+                dataStart = fd.getStart(); // The starting byte number of the current packet
+                byte[] fileData = new byte[totalSize]; // The new byte array that will accept the incoming packets
+                System.arraycopy(fd.getData(), 0, fileData, dataStart, fd.getData().length);  // Copy the incoming packet into the byte array
+                recievedPackets[currentPacket-1]=currentPacket; // Acknowledge that the packet was recieved.
                 
-                totalSize = fd.getTotalFileSize();
-                numPackets = fd.getTotalPackets();
-                int[] recievedPackets= new int[numPackets];
-                currentPacket = fd.getPacketSeqNum();
-                dataStart = fd.getStart();
-                dataEnd = fd.getEnd();
-                byte[] fileData = new byte[totalSize];
-                System.arraycopy(fd.getData(), 0, fileData, dataStart, fd.getData().length);
-                recievedPackets[currentPacket-1]=currentPacket;
-                
+                // Acknowledge that the packet was received
                 System.out.println("Packet received.");
                 
-                /***Send ack when data received***/
                 //Create ack and write to buffer
                 ack = new Acknowledgement(fd.getSeqNum());
                 oos.writeObject(ack);
@@ -147,21 +140,21 @@ public class ClientLocalURLThread extends Thread{
                 sock.send(ackPacket);
                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                 
+                // Loop through each additional packet
                 for (int i = 2; i <= numPackets;i++){
                 	
-                	/***Receive data***/
+                	// Recieve the data and create an object with the information
                     DatagramPacket moreDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
-                    
-                    // Recieve the data and create an object with the information
                     sock.receive(moreDataFromClient);
-                    
                     FileData mfd = (FileData) ois.readObject();
                     
+                    // Update the current Packet Number
                     currentPacket = mfd.getPacketSeqNum();
                     
+                    // Check if the packet is where it should be. 
                     if (currentPacket != i){
-                    	if (currentPacket < i){
-                    		if (recievedPackets[currentPacket-1] != 0){
+                    	if (currentPacket < i){   // If the packet is 1 behind... 
+                    		if (recievedPackets[currentPacket-1] != 0){        // Check to see if the value was already written. If it was ack it and notify the user.
                     			System.out.println("packet has already been recieved.");
                     			
                                 /***Send ack when data received***/
@@ -179,10 +172,9 @@ public class ClientLocalURLThread extends Thread{
                                 System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
                     			
                     		}
-                    		else if (recievedPackets[currentPacket-1] == 0 && recievedPackets[currentPacket+1] == 0){
+                    		else if (recievedPackets[currentPacket-1] == 0 && recievedPackets[currentPacket+1] == 0){   // Otherwise update the data and ack the server
                     			
                                 dataStart = mfd.getStart();
-                                dataEnd = mfd.getEnd();
                                 System.arraycopy(mfd.getData(), 0, fileData, mfd.getStart(), mfd.getData().length);
                                 
                                 System.out.println("Packet received.");
@@ -206,7 +198,8 @@ public class ClientLocalURLThread extends Thread{
                     	else;
                     }
                     else{
-                    	if (recievedPackets[currentPacket-1] != 0){
+                    	// If the current packet already has a value. Notify the user at the console and ack the server.
+                    	if (recievedPackets[currentPacket-1] != 0){  
                 			System.out.println("packet has already been recieved.");
                 			
                             /***Send ack when data received***/
@@ -224,8 +217,8 @@ public class ClientLocalURLThread extends Thread{
                             System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 	
                 		}
                     	else{
+                    		// Otherwise accept the data
                     		dataStart = mfd.getStart();
-                            dataEnd = mfd.getEnd();
                             System.arraycopy(mfd.getData(), 0, fileData, mfd.getStart(), mfd.getData().length);
                             
                             System.out.println("Packet received.");
@@ -248,11 +241,14 @@ public class ClientLocalURLThread extends Thread{
                 }
                 
                 
-                // Print file data to console
+                // Check to see if the size of the created file matches the length sent by the server
+                // If not throw an IO exception and notify the user.
                 if (totalSize != fileData.length){
                 	bos.close();
                 	throw new IOException("Files do not match. Please retry.");
                 }
+                
+                // Print the file length
                 System.out.println("File size: " + fileData.length);
                 
 	            try {
