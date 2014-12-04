@@ -120,6 +120,8 @@ public class Server {
 	                
 	                //inserting and setting total file size into the FileData packet
 	                fdToClient.setTotalFileSize(ln);
+	                fdToClient.setPacketSeqNum(i);
+	                fdToClient.setTotalPackets(completePackets);
 	                
 	                //System.out.println("fdToClient:" + fdToClient.getData());
 	                oos.writeObject(fdToClient);
@@ -130,8 +132,11 @@ public class Server {
 	                 
 	                sock.send(dataToClient);
 	                System.out.println(fr.filename + " sent...");
+	                
 	                // Make sure the ack is recieved
-	                while (true){
+	                sock.setSoTimeout(timeout);
+	                boolean ackRecieved = false;
+	                while (ackRecieved == false){
 		                try{
 		                // Receive ack when data sent
 		                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
@@ -139,9 +144,9 @@ public class Server {
 		                 
 		                ack = (Acknowledgement) ois.readObject();
 		                System.out.println(ack.getSeqNum() + " Ack received...");
-		                break;
+		                ackRecieved = true;
 		                }
-		                catch (IOException e){
+		                catch (SocketTimeoutException e){
 		                	System.out.println("Transmission Error, retrying packet");
 		                	
 		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
@@ -156,6 +161,7 @@ public class Server {
 			                System.out.println(fr.filename + " sent...");
 		                }
 	                }
+	                sock.setSoTimeout(0);
             	}
             	
             	// Send final packet
@@ -167,6 +173,12 @@ public class Server {
             				
 	                FileData fdToClient = new FileData(PACKET_SIZE, xferData);
 	                //System.out.println("fdToClient:" + fdToClient.getData());
+	                
+	                //inserting and setting total file size, sequence number, and total number of packets into the FileData packet
+	                fdToClient.setTotalFileSize(ln);
+	                fdToClient.setPacketSeqNum(completePackets);
+	                fdToClient.setTotalPackets(completePackets);
+	                
 	                oos.writeObject(fdToClient);
 	                oos.flush();
 	                 
@@ -182,8 +194,11 @@ public class Server {
 	                 
 	                ack = (Acknowledgement) ois.readObject();
 	                System.out.println(ack.getSeqNum() + " Ack received...");
+	               
 	                // Make sure the ack is recieved
-	                while (true){
+	                sock.setSoTimeout(timeout);
+	                boolean ackRecieved = false;
+	                while (ackRecieved == false){
 		                try{
 		                // Receive ack when data sent
 		                ackPacket = new DatagramPacket(rxBuff, rxBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
@@ -193,7 +208,7 @@ public class Server {
 		                System.out.println(ack.getSeqNum() + " Ack received...");
 		                break;
 		                }
-		                catch (IOException e){
+		                catch (SocketTimeoutException e){
 		                	System.out.println("Transmission Error, retrying packet");
 		                	
 		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
@@ -208,6 +223,7 @@ public class Server {
 			                System.out.println(fr.filename + " sent...");
 		                }
 	                }
+	                sock.setSoTimeout(0);
             	}
             }
              
