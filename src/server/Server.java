@@ -136,6 +136,7 @@ public class Server {
 	                // Make sure the ack is recieved
 	                sock.setSoTimeout(timeout);
 	                boolean ackRecieved = false;
+	                int kill = 0;
 	                while (ackRecieved == false){
 		                try{
 		                // Receive ack when data sent
@@ -147,6 +148,9 @@ public class Server {
 		                ackRecieved = true;
 		                }
 		                catch (SocketTimeoutException e){
+		                	if (kill == 5){
+		                		throw new IOException("Transmission Failed");
+		                	}else kill = kill + 1;
 		                	System.out.println("Transmission Error, retrying packet");
 		                	
 		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
@@ -198,6 +202,7 @@ public class Server {
 	                // Make sure the ack is recieved
 	                sock.setSoTimeout(timeout);
 	                boolean ackRecieved = false;
+	                int kill = 0;
 	                while (ackRecieved == false){
 		                try{
 		                // Receive ack when data sent
@@ -209,6 +214,9 @@ public class Server {
 		                break;
 		                }
 		                catch (SocketTimeoutException e){
+		                	if (kill == 5){
+		                		throw new IOException("Transmission Failed");
+		                	}else kill = kill + 1;
 		                	System.out.println("Transmission Error, retrying packet");
 		                	
 		                	FileData retryfdToClient = new FileData(PACKET_SIZE, xferData);
