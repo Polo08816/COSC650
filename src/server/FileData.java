@@ -19,6 +19,8 @@ public class FileData implements Serializable {
     private int totalFileSize;
     private int packetSeqNum;
     private int totalPackets;
+    private int byteStart;
+    private int byteEnd;
      
     public FileData (int chunk, byte[] data) {
         this.seqNum = System.currentTimeMillis();
@@ -91,5 +93,21 @@ public class FileData implements Serializable {
 	
 	public void setTotalPackets(int totalPackets) {
 		this.totalPackets = totalPackets;
+	}
+	
+	public int getStart() {
+		return byteStart;
+	}
+	
+	public void setStart(int byteStart) {
+		this.byteStart = byteStart;
+	}
+	
+	public int getEnd() {
+		return byteEnd;
+	}
+	
+	public void setEnd(int byteEnd) {
+		this.byteEnd = byteEnd;
 	}
 }

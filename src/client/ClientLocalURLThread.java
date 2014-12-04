@@ -2,6 +2,7 @@ package client;
 
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
 
 import server.*;
 
@@ -94,6 +95,13 @@ public class ClientLocalURLThread extends Thread{
             // Download File
             if (direction.equals("down")) {
             	
+            	int numPackets;
+            	int totalSize;
+            	int currentPacket;
+            	int dataStart;
+            	int dataEnd;
+            	byte[] fileData;
+            	
             	// Create the file and place it in the directory listed
                 File tmp = new File (filename);
                 //File file = new File ("D:\\COSC650-" + tmp.getName());
@@ -106,30 +114,166 @@ public class ClientLocalURLThread extends Thread{
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
                  
                 /***Receive data***/
-                DatagramPacket dataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
+                DatagramPacket initialDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
                 
                 // Recieve the data and create an object with the information
-                sock.receive(dataFromClient);
+                sock.receive(initialDataFromClient);
+                
                 FileData fd = (FileData) ois.readObject();
                 
-                // Print file data to console
-                System.out.println("File size: " + fd.getData().length);
+                totalSize = fd.getTotalFileSize();
+                numPackets = fd.getTotalPackets();
+                int[] recievedPackets= new int[numPackets];
+                currentPacket = fd.getPacketSeqNum();
+                dataStart = fd.getStart();
+                dataEnd = fd.getEnd();
+                fileData = fd.getData();
+                recievedPackets[currentPacket-1]=currentPacket;
                 
-                // Write the data to the file
-                if((fd != null)&&(fd.getData() != null))
-                {
-	                try {
-	                    bos.write(fd.getData(),0,fd.getData().length);
-	                    bos.close();
-	                } catch (IOException e) {
-	                    System.out.println(e.getMessage());
-	                    bos.close();
-	                    file.delete();
-	                }
+                System.out.println("Packet received.");
+                
+                /***Send ack when data received***/
+                //Create ack and write to buffer
+                ack = new Acknowledgement(fd.getSeqNum());
+                oos.writeObject(ack);
+                oos.flush();
+                 
+                //make packet with buffer
+                txBuff = baos.toByteArray();
+                ackPacket = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+                 
+                //send packet
+                sock.send(ackPacket);
+                System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
+                
+                for (int i = 2; i <= numPackets;i++){
+                    
+                	byte[] oldFileData;
+                	oldFileData = fileData;
+                	
+                	/***Receive data***/
+                    DatagramPacket moreDataFromClient = new DatagramPacket(rxBuff, rxBuff.length );
+                    
+                    // Recieve the data and create an object with the information
+                    sock.receive(moreDataFromClient);
+                    
+                    FileData mfd = (FileData) ois.readObject();
+                    
+                    currentPacket = mfd.getPacketSeqNum();
+                    
+                    if (currentPacket != i){
+                    	if (currentPacket < i){
+                    		if (recievedPackets[currentPacket] != 0){
+                    			System.out.println("packet has already been recieved.");
+                    			
+                                /***Send ack when data received***/
+                                //Create ack and write to buffer
+                                ack = new Acknowledgement(fd.getSeqNum());
+                                oos.writeObject(ack);
+                                oos.flush();
+                                 
+                                //make packet with buffer
+                                txBuff = baos.toByteArray();
+                                ackPacket = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+                                 
+                                //send packet
+                                sock.send(ackPacket);
+                                System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
+                    			
+                    		}
+                    		else if (recievedPackets[currentPacket] == 0 && recievedPackets[currentPacket+1] == 0){
+                    			
+                                dataStart = mfd.getStart();
+                                dataEnd = mfd.getEnd();
+                                byte[] newFileData = new byte[oldFileData.length + mfd.getData().length];
+                                System.arraycopy(oldFileData, 0, newFileData, 0, oldFileData.length);
+                                System.arraycopy(mfd.getData(), 0, newFileData, oldFileData.length, mfd.getData().length);
+                                fileData = newFileData;
+                                
+                                System.out.println("Packet received.");
+                                
+                                /***Send ack when data received***/
+                                //Create ack and write to buffer
+                                ack = new Acknowledgement(fd.getSeqNum());
+                                oos.writeObject(ack);
+                                oos.flush();
+                                 
+                                //make packet with buffer
+                                txBuff = baos.toByteArray();
+                                ackPacket = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+                                 
+                                //send packet
+                                sock.send(ackPacket);
+                                System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
+                                
+                    		}
+                    	}
+                    	else;
+                    }
+                    else{
+                    	if (recievedPackets[currentPacket] != 0){
+                			System.out.println("packet has already been recieved.");
+                			
+                            /***Send ack when data received***/
+                            //Create ack and write to buffer
+                            ack = new Acknowledgement(fd.getSeqNum());
+                            oos.writeObject(ack);
+                            oos.flush();
+                             
+                            //make packet with buffer
+                            txBuff = baos.toByteArray();
+                            ackPacket = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+                             
+                            //send packet
+                            sock.send(ackPacket);
+                            System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 	
+                		}
+                    	else{
+                    		dataStart = mfd.getStart();
+                            dataEnd = mfd.getEnd();
+                            byte[] newFileData = new byte[oldFileData.length + mfd.getData().length];
+                            System.arraycopy(oldFileData, 0, newFileData, 0, oldFileData.length);
+                            System.arraycopy(mfd.getData(), 0, newFileData, oldFileData.length, mfd.getData().length);
+                            fileData = newFileData;
+                            
+                            System.out.println("Packet received.");
+                            
+                            /***Send ack when data received***/
+                            //Create ack and write to buffer
+                            ack = new Acknowledgement(fd.getSeqNum());
+                            oos.writeObject(ack);
+                            oos.flush();
+                             
+                            //make packet with buffer
+                            txBuff = baos.toByteArray();
+                            ackPacket = new DatagramPacket(txBuff, txBuff.length, reqPacket.getAddress(), reqPacket.getPort() );
+                             
+                            //send packet
+                            sock.send(ackPacket);
+                            System.out.println(fr.getSeqNum() + " acknowledgement sent..."); 
+                    	}
+                    }
                 }
                 
+                
                 // Print file data to console
-                String str = new String(fd.getData(), "UTF-8");
+                if (totalSize != fileData.length){
+                	bos.close();
+                	throw new IOException("Files do not match. Please retry.");
+                }
+                System.out.println("File size: " + fd.getData().length);
+                
+	            try {
+	                bos.write(fileData,0,fileData.length);
+	                bos.close();
+	            } catch (IOException e) {
+	                System.out.println(e.getMessage());
+	                bos.close();
+	                file.delete();
+	            }
+                
+                // Print file data to console
+                String str = new String(fileData, "UTF-8");
                 System.out.println("file content:");
                 System.out.println(str);                
                 System.out.println(filename + " file received.");
