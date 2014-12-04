@@ -9,6 +9,7 @@ public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
 	private static String outputPath = "output/fromServer-";
+	public static final String outputFolder = "output";
 	private static int portNum = 12345; 
     private static DatagramSocket sock;
     private static InetAddress server;
@@ -32,8 +33,23 @@ public class ClientLocalURLThread extends Thread{
      * @throws ClassNotFoundException
      */
     public static void recieve(String args[]) throws IOException, ClassNotFoundException {
-         
-        //String direction = up/down
+        
+    	File f = new File(outputFolder);
+    	
+    	try {
+			//Create directories
+	    	if(f.exists() && !f.isDirectory()) {
+	    		System.out.println("Output path exists");
+	    	}else{
+	    		System.out.println("Output path does not exist. Creating.");
+	    		f.mkdirs();
+	    	}
+    	} catch (SecurityException e1){
+	    	System.out.println("\nCould not create directory.\n");
+			e1.printStackTrace();
+	    }
+    	
+    	//String direction = up/down
         String direction = args[0];
         String filename = args[1];
         int blocksize = Integer.parseInt(args[2]); 
