@@ -8,7 +8,7 @@ import server.*;
 public class ClientLocalURLThread extends Thread{
 	
 	private String FilePath;
-	private static String outputPath = "output/output-";
+	private static String outputPath = "output/fromServer-";
 	private static int portNum = 12345; 
     private static DatagramSocket sock;
     private static InetAddress server;
